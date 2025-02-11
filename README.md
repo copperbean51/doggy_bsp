@@ -25,6 +25,6 @@ sudo reboot
 ```
 
 ```
-cd ~/mini_pupper_bsp
+cd ~/doggy_bsp
 ./test.sh
 ```
