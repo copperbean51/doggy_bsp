@@ -20,8 +20,8 @@ grep -q "doggy" /etc/hosts || echo "127.0.0.1	doggy" | sudo tee -a /etc/hosts
 
 ### Install system components
 $BASEDIR/prepare_dkms.sh
-COMPONENTS=(IO_Configuration System PWMController)
 
+COMPONENTS=(IO_Configuration System PWMController)
 for dir in ${COMPONENTS[@]}; do
     cd $BASEDIR/$dir
     ./install.sh
@@ -38,7 +38,9 @@ else
     sudo pip install $BASEDIR/$PYTHONMODLE
 fi
 
+#  export BASEDIR="/home/wl/doggy_bsp"
 sudo sed -i "s|BASEDIR|$BASEDIR|" /etc/rc.local
+
 
 ### Make pwm sysfs work for non-root users
 getent group gpio || sudo groupadd gpio && sudo gpasswd -a $(whoami) gpio
@@ -46,12 +48,6 @@ getent group dialout || sudo groupadd dialout && sudo gpasswd -a $(whoami) dialo
 
 sudo tee /etc/udev/rules.d/99-doggy-pwm.rules << EOF > /dev/null
 KERNEL=="pwmchip0", SUBSYSTEM=="pwm", RUN+="/usr/lib/udev/pwm-doggy.sh"
-EOF
-
-
-sudo tee /etc/udev/rules.d/99-doggy-nvmem.rules << EOF > /dev/null
-KERNEL=="3-00500", SUBSYSTEM=="nvmem", RUN+="/bin/chmod 666 /sys/bus/nvmem/devices/3-00500/nvmem"
-KERNEL=="3-00501", SUBSYSTEM=="nvmem", RUN+="/bin/chmod 666 /sys/bus/nvmem/devices/3-00501/nvmem"
 EOF
 
 sudo tee /usr/lib/udev/pwm-doggy.sh << "EOF" > /dev/null
@@ -65,6 +61,12 @@ done
 EOF
 
 sudo chmod +x /usr/lib/udev/pwm-doggy.sh
+
+
+# sudo tee /etc/udev/rules.d/99-doggy-nvmem.rules << EOF > /dev/null
+# KERNEL=="3-00500", SUBSYSTEM=="nvmem", RUN+="/bin/chmod 666 /sys/bus/nvmem/devices/3-00500/nvmem"
+# KERNEL=="3-00501", SUBSYSTEM=="nvmem", RUN+="/bin/chmod 666 /sys/bus/nvmem/devices/3-00501/nvmem"
+# EOF
 
 
 sudo udevadm control --reload-rules && sudo udevadm trigger
